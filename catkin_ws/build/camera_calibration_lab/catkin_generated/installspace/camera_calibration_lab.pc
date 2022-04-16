@@ -1,8 +1,0 @@
-prefix=/home/abe/02-14/catkin_ws/install
-
-Name: camera_calibration_lab
-Description: Description of camera_calibration_lab
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
