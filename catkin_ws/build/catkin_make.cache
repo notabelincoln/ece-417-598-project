@@ -1,0 +1,2 @@
+camera_calibration_lab
+-DCATKIN_DEVEL_PREFIX=/home/abe/02-14/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/abe/02-14/catkin_ws/install -G Unix Makefiles
