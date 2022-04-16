@@ -1,0 +1,3 @@
+/home/abe/Downloads/github-repositories/ece-417-598-project/project_standalone/garbage/CMakeFiles/rebuild_cache.dir
+/home/abe/Downloads/github-repositories/ece-417-598-project/project_standalone/garbage/CMakeFiles/edit_cache.dir
+/home/abe/Downloads/github-repositories/ece-417-598-project/project_standalone/garbage/CMakeFiles/main.dir
