@@ -1,2 +1,2 @@
 - setup-file:
-    local-name: /home/ece417/catkin_ws/devel/setup.sh
+    local-name: /home/ece417/ece-417-598-project/catkin_ws/devel/setup.sh
