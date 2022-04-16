@@ -39,7 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/ece417/ece-417-598-project/catkin_ws/build/gtest/googletest/cmake_install.cmake")
+  include("/home/abe/Downloads/github-repositories/ece-417-598-project/catkin_ws/build/gtest/googletest/cmake_install.cmake")
 
 endif()
 
