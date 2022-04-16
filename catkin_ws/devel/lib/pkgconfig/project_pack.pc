@@ -1,0 +1,8 @@
+prefix=/home/ece417/ece-417-598-project/catkin_ws/devel
+
+Name: project_pack
+Description: Description of project_pack
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
