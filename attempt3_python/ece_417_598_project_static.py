@@ -6,7 +6,7 @@ import os
 import glob
 
 # Defining the dimensions of checkerboard
-CHECKERBOARD = (6,9)
+CHECKERBOARD = (7,9)
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
 # Creating vector to store vectors of 3D points for each checkerboard image
@@ -23,6 +23,7 @@ prev_img_shape = None
 # Extracting path of individual image stored in a given directory
 images = glob.glob('./*.jpg')
 for fname in images:
+    print(str(fname))
     img = cv2.imread(fname)
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     # Find the chess board corners
@@ -35,6 +36,7 @@ for fname in images:
     them on the images of checker board
     """
     if ret == True:
+        print("ret == True")
         objpoints.append(objp)
         # refining pixel coordinates for given 2d points.
         corners2 = cv2.cornerSubPix(gray, corners, (11,11),(-1,-1), criteria)
@@ -44,7 +46,7 @@ for fname in images:
         # Draw and display the corners
         img = cv2.drawChessboardCorners(img, CHECKERBOARD, corners2, ret)
     
-    cv2.imshow('img',img)
+    cv2.imshow(str(fname),img)
     cv2.waitKey(0)
 
 cv2.destroyAllWindows()
