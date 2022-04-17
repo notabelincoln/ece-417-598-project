@@ -6,7 +6,7 @@
 #include <iostream>
 
 // Defining the dimensions of checkerboard
-int CHECKERBOARD[2]{6,9}; 
+int CHECKERBOARD[2]{7,9}; 
 
 int main()
 {
@@ -28,7 +28,7 @@ int main()
   // Extracting path of individual image stored in a given directory
   std::vector<cv::String> images;
   // Path of the folder containing checkerboard images
-  std::string path = "./images/*.jpg";
+  std::string path = "./*.jpg";
 
   cv::glob(path, images);
 
