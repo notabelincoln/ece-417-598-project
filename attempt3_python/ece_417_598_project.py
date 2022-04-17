@@ -20,7 +20,6 @@ vid = cv2.VideoCapture(0)
 while (True):
     ret, frame = vid.read()
 
-
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     ret, corners = cv2.findChessboardCorners(gray, checkerboard_dims, \
@@ -28,9 +27,11 @@ while (True):
             cv2.CALIB_CB_NORMALIZE_IMAGE)
     
     if ret == True:
+        print("ret == True")
+        
         obj_points.append(objp)
         
-        corners2 = cv2.cornerSubpix(gray, corners, (11,11), (-1,-1), criteria)
+        corners2 = cv2.cornerSubPix(gray, corners, (11,11), (-1,-1), criteria)
 
         img_points.append(corners2)
 
