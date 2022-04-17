@@ -6,10 +6,18 @@
 
 #IncludeRegexTransform: 
 
-/home/abe/Downloads/github-repositories/ece-417-598-project/attempt4_c++/DisplayImage.cpp
+/home/abe/Downloads/github-repositories/ece-417-598-project/attempt4_c++/CornerDetection.cpp
+opencv2/opencv.hpp
+-
+opencv2/calib3d/calib3d.hpp
+-
+opencv2/highgui/highgui.hpp
+-
+opencv2/imgproc/imgproc.hpp
+-
 stdio.h
 -
-opencv2/opencv.hpp
+iostream
 -
 
 /usr/include/opencv4/opencv2/calib3d.hpp
@@ -19,6 +27,10 @@ opencv2/features2d.hpp
 /usr/include/opencv4/opencv2/opencv2/features2d.hpp
 opencv2/core/affine.hpp
 /usr/include/opencv4/opencv2/opencv2/core/affine.hpp
+
+/usr/include/opencv4/opencv2/calib3d/calib3d.hpp
+opencv2/calib3d.hpp
+/usr/include/opencv4/opencv2/calib3d/opencv2/calib3d.hpp
 
 /usr/include/opencv4/opencv2/core.hpp
 opencv2/core/cvdef.h
@@ -844,6 +856,10 @@ opencv2/imgcodecs.hpp
 opencv2/videoio.hpp
 /usr/include/opencv4/opencv2/opencv2/videoio.hpp
 
+/usr/include/opencv4/opencv2/highgui/highgui.hpp
+opencv2/highgui.hpp
+/usr/include/opencv4/opencv2/highgui/opencv2/highgui.hpp
+
 /usr/include/opencv4/opencv2/imgcodecs.hpp
 opencv2/core.hpp
 /usr/include/opencv4/opencv2/opencv2/core.hpp
@@ -851,6 +867,10 @@ opencv2/core.hpp
 /usr/include/opencv4/opencv2/imgproc.hpp
 opencv2/core.hpp
 /usr/include/opencv4/opencv2/opencv2/core.hpp
+
+/usr/include/opencv4/opencv2/imgproc/imgproc.hpp
+opencv2/imgproc.hpp
+/usr/include/opencv4/opencv2/imgproc/opencv2/imgproc.hpp
 
 /usr/include/opencv4/opencv2/ml.hpp
 opencv2/core.hpp

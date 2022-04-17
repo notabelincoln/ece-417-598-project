@@ -56,17 +56,6 @@ CMAKE_BINARY_DIR = /home/abe/Downloads/github-repositories/ece-417-598-project/a
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
-
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
-
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
@@ -77,6 +66,17 @@ edit_cache:
 edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
+
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/usr/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -111,44 +111,44 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named DisplayImage
+# Target rules for targets named CornerDetection
 
 # Build rule for target.
-DisplayImage: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 DisplayImage
-.PHONY : DisplayImage
+CornerDetection: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 CornerDetection
+.PHONY : CornerDetection
 
 # fast build rule for target.
-DisplayImage/fast:
-	$(MAKE) -f CMakeFiles/DisplayImage.dir/build.make CMakeFiles/DisplayImage.dir/build
-.PHONY : DisplayImage/fast
+CornerDetection/fast:
+	$(MAKE) -f CMakeFiles/CornerDetection.dir/build.make CMakeFiles/CornerDetection.dir/build
+.PHONY : CornerDetection/fast
 
-DisplayImage.o: DisplayImage.cpp.o
+CornerDetection.o: CornerDetection.cpp.o
 
-.PHONY : DisplayImage.o
+.PHONY : CornerDetection.o
 
 # target to build an object file
-DisplayImage.cpp.o:
-	$(MAKE) -f CMakeFiles/DisplayImage.dir/build.make CMakeFiles/DisplayImage.dir/DisplayImage.cpp.o
-.PHONY : DisplayImage.cpp.o
+CornerDetection.cpp.o:
+	$(MAKE) -f CMakeFiles/CornerDetection.dir/build.make CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o
+.PHONY : CornerDetection.cpp.o
 
-DisplayImage.i: DisplayImage.cpp.i
+CornerDetection.i: CornerDetection.cpp.i
 
-.PHONY : DisplayImage.i
+.PHONY : CornerDetection.i
 
 # target to preprocess a source file
-DisplayImage.cpp.i:
-	$(MAKE) -f CMakeFiles/DisplayImage.dir/build.make CMakeFiles/DisplayImage.dir/DisplayImage.cpp.i
-.PHONY : DisplayImage.cpp.i
+CornerDetection.cpp.i:
+	$(MAKE) -f CMakeFiles/CornerDetection.dir/build.make CMakeFiles/CornerDetection.dir/CornerDetection.cpp.i
+.PHONY : CornerDetection.cpp.i
 
-DisplayImage.s: DisplayImage.cpp.s
+CornerDetection.s: CornerDetection.cpp.s
 
-.PHONY : DisplayImage.s
+.PHONY : CornerDetection.s
 
 # target to generate assembly for a file
-DisplayImage.cpp.s:
-	$(MAKE) -f CMakeFiles/DisplayImage.dir/build.make CMakeFiles/DisplayImage.dir/DisplayImage.cpp.s
-.PHONY : DisplayImage.cpp.s
+CornerDetection.cpp.s:
+	$(MAKE) -f CMakeFiles/CornerDetection.dir/build.make CMakeFiles/CornerDetection.dir/CornerDetection.cpp.s
+.PHONY : CornerDetection.cpp.s
 
 # Help Target
 help:
@@ -156,12 +156,12 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... DisplayImage"
-	@echo "... DisplayImage.o"
-	@echo "... DisplayImage.i"
-	@echo "... DisplayImage.s"
+	@echo "... rebuild_cache"
+	@echo "... CornerDetection"
+	@echo "... CornerDetection.o"
+	@echo "... CornerDetection.i"
+	@echo "... CornerDetection.s"
 .PHONY : help
 
 
