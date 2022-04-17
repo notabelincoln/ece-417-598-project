@@ -4,7 +4,7 @@ import numpy as np
 
 # Dimensions of checkerboard
 checkerboard_dims = (7, 9)
-critera = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+critera = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 1000, 0.001)
 
 obj_points = []
 img_points = []
@@ -20,9 +20,9 @@ vid = cv2.VideoCapture(0)
 while (True):
     ret, frame = vid.read()
 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    ret, corners = cv2.findChessboardCorners(gray, checkerboard_dims, \
+    ret, corners = cv2.findChessboardCorners(frame, checkerboard_dims, \
             cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_FAST_CHECK + \
             cv2.CALIB_CB_NORMALIZE_IMAGE)
     
