@@ -1,91 +1,96 @@
-#include <opencv2/opencv.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <stdio.h>
 #include <iostream>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/calib3d.hpp>
+#include <opencv2/highgui.hpp>
 
-// Defining the dimensions of checkerboard
-int CHECKERBOARD[2]{7,9}; 
+using namespace std;
+using namespace cv;
 
-int main()
+namespace
 {
-  // Creating vector to store vectors of 3D points for each checkerboard image
-  std::vector<std::vector<cv::Point3f> > objpoints;
+enum Pattern { CHESSBOARD, CIRCLES_GRID, ASYMMETRIC_CIRCLES_GRID };
 
-  // Creating vector to store vectors of 2D points for each checkerboard image
-  std::vector<std::vector<cv::Point2f> > imgpoints;
+Scalar randomColor( RNG& rng )
+{
+  int icolor = (unsigned int) rng;
+  return Scalar( icolor & 255, (icolor >> 8) & 255, (icolor >> 16) & 255 );
+}
 
-  // Defining the world coordinates for 3D points
-  std::vector<cv::Point3f> objp;
-  for(int i{0}; i<CHECKERBOARD[1]; i++)
-  {
-    for(int j{0}; j<CHECKERBOARD[0]; j++)
-      objp.push_back(cv::Point3f(j,i,0));
-  }
+void perspectiveCorrection(const string &img1Path, const string &img2Path, const Size &patternSize, RNG &rng)
+{
+    Mat img1 = imread( samples::findFile(img1Path) );
+    Mat img2 = imread( samples::findFile(img2Path) );
 
+    //! [find-corners]
+    vector<Point2f> corners1, corners2;
+    bool found1 = findChessboardCorners(img1, patternSize, corners1);
+    bool found2 = findChessboardCorners(img2, patternSize, corners2);
+    //! [find-corners]
 
-  // Extracting path of individual image stored in a given directory
-  std::vector<cv::String> images;
-  // Path of the folder containing checkerboard images
-  std::string path = "./*.jpg";
-
-  cv::glob(path, images);
-
-  cv::Mat frame, gray;
-  // vector to store the pixel coordinates of detected checker board corners 
-  std::vector<cv::Point2f> corner_pts;
-  bool success;
-
-  // Looping over all the images in the directory
-  for(int i{0}; i<images.size(); i++)
-  {
-    frame = cv::imread(images[i]);
-    cv::cvtColor(frame,gray,cv::COLOR_BGR2GRAY);
-
-    // Finding checker board corners
-    // If desired number of corners are found in the image then success = true  
-    success = cv::findChessboardCorners(gray, cv::Size(CHECKERBOARD[0], CHECKERBOARD[1]), corner_pts, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
-    
-    /* 
-     * If desired number of corner are detected,
-     * we refine the pixel coordinates and display 
-     * them on the images of checker board
-    */
-    if(success)
+    if (!found1 || !found2)
     {
-      cv::TermCriteria criteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.001);
-      
-      // refining pixel coordinates for given 2d points.
-      cv::cornerSubPix(gray,corner_pts,cv::Size(11,11), cv::Size(-1,-1),criteria);
-      
-      // Displaying the detected corner points on the checker board
-      cv::drawChessboardCorners(frame, cv::Size(CHECKERBOARD[0], CHECKERBOARD[1]), corner_pts, success);
-      
-      objpoints.push_back(objp);
-      imgpoints.push_back(corner_pts);
+        cout << "Error, cannot find the chessboard corners in both images." << endl;
+        return;
     }
 
-    cv::imshow("Image",frame);
-    cv::waitKey(0);
-  }
+    //! [estimate-homography]
+    Mat H = findHomography(corners1, corners2);
+    cout << "H:\n" << H << endl;
+    //! [estimate-homography]
 
-  cv::destroyAllWindows();
+    //! [warp-chessboard]
+    Mat img1_warp;
+    warpPerspective(img1, img1_warp, H, img1.size());
+    //! [warp-chessboard]
 
-  cv::Mat cameraMatrix,distCoeffs,R,T;
+    Mat img_draw_warp;
+    hconcat(img2, img1_warp, img_draw_warp);
+    imshow("Desired chessboard view / Warped source chessboard view", img_draw_warp);
 
-  /*
-   * Performing camera calibration by 
-   * passing the value of known 3D points (objpoints)
-   * and corresponding pixel coordinates of the 
-   * detected corners (imgpoints)
-  */
-  cv::calibrateCamera(objpoints, imgpoints, cv::Size(gray.rows,gray.cols), cameraMatrix, distCoeffs, R, T);
+    //! [compute-transformed-corners]
+    Mat img_draw_matches;
+    hconcat(img1, img2, img_draw_matches);
+    for (size_t i = 0; i < corners1.size(); i++)
+    {
+        Mat pt1 = (Mat_<double>(3,1) << corners1[i].x, corners1[i].y, 1);
+        Mat pt2 = H * pt1;
+        pt2 /= pt2.at<double>(2);
 
-  std::cout << "cameraMatrix : " << cameraMatrix << std::endl;
-  std::cout << "distCoeffs : " << distCoeffs << std::endl;
-  std::cout << "Rotation vector : " << R << std::endl;
-  std::cout << "Translation vector : " << T << std::endl;
+        Point end( (int) (img1.cols + pt2.at<double>(0)), (int) pt2.at<double>(1) );
+        line(img_draw_matches, corners1[i], end, randomColor(rng), 2);
+    }
 
-  return 0;
+    imshow("Draw matches", img_draw_matches);
+    waitKey();
+    //! [compute-transformed-corners]
+}
+
+const char* params
+    = "{ help h         |       | print usage }"
+      "{ image1         | left02.jpg | path to the source chessboard image }"
+      "{ image2         | left01.jpg | path to the desired chessboard image }"
+      "{ width bw       | 9     | chessboard width }"
+      "{ height bh      | 6     | chessboard height }";
+}
+
+int main(int argc, char *argv[])
+{
+    cv::RNG rng( 0xFFFFFFFF );
+    CommandLineParser parser(argc, argv, params);
+
+    if (parser.has("help"))
+    {
+        parser.about("Code for homography tutorial.\n"
+            "Example 2: perspective correction.\n");
+        parser.printMessage();
+        return 0;
+    }
+
+    Size patternSize(7, 9);
+    perspectiveCorrection("image1.jpg",
+                          "image0.jpg",
+                          patternSize, rng);
+
+    return 0;
 }

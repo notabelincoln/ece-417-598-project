@@ -4,7 +4,6 @@
 CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o
  /home/abe/Downloads/github-repositories/ece-417-598-project/attempt4_c++/CornerDetection.cpp
  /usr/include/opencv4/opencv2/calib3d.hpp
- /usr/include/opencv4/opencv2/calib3d/calib3d.hpp
  /usr/include/opencv4/opencv2/core.hpp
  /usr/include/opencv4/opencv2/core/affine.hpp
  /usr/include/opencv4/opencv2/core/async.hpp
@@ -80,10 +79,8 @@ CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o
  /usr/include/opencv4/opencv2/flann/saving.h
  /usr/include/opencv4/opencv2/flann/timer.h
  /usr/include/opencv4/opencv2/highgui.hpp
- /usr/include/opencv4/opencv2/highgui/highgui.hpp
  /usr/include/opencv4/opencv2/imgcodecs.hpp
  /usr/include/opencv4/opencv2/imgproc.hpp
- /usr/include/opencv4/opencv2/imgproc/imgproc.hpp
  /usr/include/opencv4/opencv2/ml.hpp
  /usr/include/opencv4/opencv2/ml/ml.inl.hpp
  /usr/include/opencv4/opencv2/objdetect.hpp

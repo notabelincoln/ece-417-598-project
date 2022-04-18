@@ -3,7 +3,6 @@
 
 CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: CornerDetection.cpp
 CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/opencv2/calib3d.hpp
-CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/opencv2/calib3d/calib3d.hpp
 CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/opencv2/core.hpp
 CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/opencv2/core/affine.hpp
 CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/opencv2/core/async.hpp
@@ -79,10 +78,8 @@ CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/openc
 CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/opencv2/flann/saving.h
 CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/opencv2/flann/timer.h
 CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/opencv2/highgui.hpp
-CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/opencv2/highgui/highgui.hpp
 CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/opencv2/imgcodecs.hpp
 CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/opencv2/imgproc.hpp
-CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/opencv2/imgproc/imgproc.hpp
 CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/opencv2/ml.hpp
 CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/opencv2/ml/ml.inl.hpp
 CMakeFiles/CornerDetection.dir/CornerDetection.cpp.o: /usr/include/opencv4/opencv2/objdetect.hpp
