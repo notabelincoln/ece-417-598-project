@@ -123,6 +123,19 @@ CornerDetection/fast:
 	$(MAKE) -f CMakeFiles/CornerDetection.dir/build.make CMakeFiles/CornerDetection.dir/build
 .PHONY : CornerDetection/fast
 
+#=============================================================================
+# Target rules for targets named DisplayImage
+
+# Build rule for target.
+DisplayImage: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 DisplayImage
+.PHONY : DisplayImage
+
+# fast build rule for target.
+DisplayImage/fast:
+	$(MAKE) -f CMakeFiles/DisplayImage.dir/build.make CMakeFiles/DisplayImage.dir/build
+.PHONY : DisplayImage/fast
+
 CornerDetection.o: CornerDetection.cpp.o
 
 .PHONY : CornerDetection.o
@@ -150,6 +163,33 @@ CornerDetection.cpp.s:
 	$(MAKE) -f CMakeFiles/CornerDetection.dir/build.make CMakeFiles/CornerDetection.dir/CornerDetection.cpp.s
 .PHONY : CornerDetection.cpp.s
 
+DisplayImage.o: DisplayImage.cpp.o
+
+.PHONY : DisplayImage.o
+
+# target to build an object file
+DisplayImage.cpp.o:
+	$(MAKE) -f CMakeFiles/DisplayImage.dir/build.make CMakeFiles/DisplayImage.dir/DisplayImage.cpp.o
+.PHONY : DisplayImage.cpp.o
+
+DisplayImage.i: DisplayImage.cpp.i
+
+.PHONY : DisplayImage.i
+
+# target to preprocess a source file
+DisplayImage.cpp.i:
+	$(MAKE) -f CMakeFiles/DisplayImage.dir/build.make CMakeFiles/DisplayImage.dir/DisplayImage.cpp.i
+.PHONY : DisplayImage.cpp.i
+
+DisplayImage.s: DisplayImage.cpp.s
+
+.PHONY : DisplayImage.s
+
+# target to generate assembly for a file
+DisplayImage.cpp.s:
+	$(MAKE) -f CMakeFiles/DisplayImage.dir/build.make CMakeFiles/DisplayImage.dir/DisplayImage.cpp.s
+.PHONY : DisplayImage.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -159,9 +199,13 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... CornerDetection"
+	@echo "... DisplayImage"
 	@echo "... CornerDetection.o"
 	@echo "... CornerDetection.i"
 	@echo "... CornerDetection.s"
+	@echo "... DisplayImage.o"
+	@echo "... DisplayImage.i"
+	@echo "... DisplayImage.s"
 .PHONY : help
 
 

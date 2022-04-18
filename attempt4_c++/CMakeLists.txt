@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
-project( CornerDetection )
+project( ECE_417_598_Project )
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
+add_executable( DisplayImage DisplayImage.cpp )
 add_executable( CornerDetection CornerDetection.cpp )
+target_link_libraries( DisplayImage ${OpenCV_LIBS} )
 target_link_libraries( CornerDetection ${OpenCV_LIBS} )
+
