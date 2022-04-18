@@ -61,6 +61,10 @@ void perspectiveCorrection(const string &img1Path, const string &img2Path, const
         line(img_draw_matches, corners1[i], end, randomColor(rng), 2);
     }
 
+    imshow(img1Path, img1);
+    imshow(img2Path, img2);
+
+    
     imshow("Draw matches", img_draw_matches);
     waitKey();
     //! [compute-transformed-corners]
@@ -87,9 +91,9 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    Size patternSize(7, 9);
-    perspectiveCorrection("image1.jpg",
-                          "image0.jpg",
+    Size patternSize(6, 8);
+    perspectiveCorrection("image0.jpg",
+                          "image1.jpg",
                           patternSize, rng);
 
     return 0;
