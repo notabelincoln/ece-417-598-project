@@ -22,35 +22,48 @@ namespace
 	}
 
 	// (Lab 8) Find  homography between two sets of 2D points
-	Eigen::Matrix3d findHomography(const std::vector<Eigen::Vector3d>& us,
-			const std::vector<Eigen::Vector3d>& ups)
+	Eigen::Matrix3d findHomography(const std::vector<Point2f>& us,
+			const std::vector<Point2f>& ups)
 	{
 		if (us.size() < 4 || ups.size() < 4) {
 			std::cerr << "Need at least four points got " << us.size() << " and " << ups.size() << "\n";
 			throw std::runtime_error("Need atleast four points");
 		}
 		Eigen::MatrixXd A(8, 9); A.setZero();
+
+		Eigen::Matrix3d u_eigen, up_eigen;
+
+		u_eigen.setOnes();
+		up_eigen.setOnes();
+
 		for (int i = 0; i < us.size(); ++i) {
+			u_eigen(0) = us[i].x;
+			u_eigen(1) = us[i].y;
+
+			up_eigen(0) = ups[i].x;
+			up_eigen(1) = ups[i].y;
+
 			// [[0ᵀ      -w'ᵢ uᵢᵀ   yᵢ' uᵢᵀ]]
 			//  [wᵢ'uᵢᵀ        0ᵀ   -xᵢ uᵢᵀ]]
-			A.block(2*i, 3, 1, 3) = (-1 * ups[i](2) * us[i].transpose());
-			A.block(2*i, 6, 1, 3) = (ups[i](1) * us[i].transpose()); 
-			A.block(2*i+1, 0, 1, 3) = (ups[i](2) * us[i].transpose());
-			A.block(2*i+1, 6, 1, 3) = (-1 * us[i](0) * us[i].transpose());
+			A.block(2*i, 3, 1, 3) = (-1 * up_eigen(2) * u_eigen.transpose());
+			A.block(2*i, 6, 1, 3) = (up_eigen(1) * u_eigen.transpose()); 
+			A.block(2*i+1, 0, 1, 3) = (up_eigen(2) * u_eigen.transpose());
+			A.block(2*i+1, 6, 1, 3) = (-1 * u_eigen(0) * u_eigen.transpose());
 		}
 
 		auto svd = A.jacobiSvd(Eigen::ComputeFullV);
 		// y = v₉
-		Eigen::VectorXd nullspace = svd.matrixV().col(8); // TODO Replace this with correct formula
+		Eigen::VectorXd nullspace = svd.matrixV().col(8);
 
 		Eigen::Matrix3d H;
-		H.row(0) = nullspace.block(0, 0, 3, 1).transpose(); // TODO: replace with correct formula
-		H.row(1) = nullspace.block(3, 0, 3, 1).transpose(); // TODO: replace with correct formula
-		H.row(2) = nullspace.block(6, 0, 3, 1).transpose(); // TODO: replace with correct formula
+		H.row(0) = nullspace.block(0, 0, 3, 1).transpose();
+		H.row(1) = nullspace.block(3, 0, 3, 1).transpose();
+		H.row(2) = nullspace.block(6, 0, 3, 1).transpose();
 
 		return H;
 	}
 
+	/*
 	// Apply homography to image
 	Eigen::MatrixXd applyHomography(const Eigen::Matrix3d& H,
 			const Eigen::MatrixXd& img) {
@@ -60,11 +73,11 @@ namespace
 		for (int new_row = 0; new_row < new_img.rows(); ++new_row) {
 			for (int new_col = 0; new_col < new_img.cols(); ++new_col) {
 				u << new_col + 0.5, new_row + 0.5, 1;
-				/**** Apply homography for each pixel ***/
+				// Apply homography for each pixel
 				// u' = H * u
 				up = H * u; // TODO replace with correct formula
 				up /= up(2);
-				/**** Apply homography for each pixel ***/
+				//Apply homography for each pixel
 				int row = round(up(1));
 				int col = round(up(0));
 				if (0 <= row && row < img.rows()
@@ -75,7 +88,9 @@ namespace
 		}
 		return new_img;
 	}
+	*/
 
+	/*
 	void eigen_imshow(const Eigen::MatrixXd& eigen_new_img) {
 		cv::Mat cv_new_img;
 		cv::eigen2cv(eigen_new_img, cv_new_img);
@@ -83,16 +98,17 @@ namespace
 		cv::imshow("new_img", cv_new_img);
 		cv::waitKey(-1);
 	}
+	*/
 
 	void perspectiveCorrection(const string &img1Path, const string &img2Path, const Size &patternSize, RNG &rng)
 	{
-		cv::Mat img1_cv = imread( samples::findFile(img1Path) );
-		cv::Mat img2_cv = imread( samples::findFile(img2Path) );
+		cv::Mat img1 = imread( samples::findFile(img1Path) );
+		cv::Mat img2 = imread( samples::findFile(img2Path) );
 
 		//! [find-corners]
-		cv::vector<Point2f> corners1_cv, corners2_cv;
-		bool found1 = findChessboardCorners(img1_cv, patternSize, corners1_cv);
-		bool found2 = findChessboardCorners(img2_cv, patternSize, corners2_cv);
+		std::vector<Point2f> corners1, corners2;
+		bool found1 = findChessboardCorners(img1, patternSize, corners1);
+		bool found2 = findChessboardCorners(img2, patternSize, corners2);
 		//! [find-corners]
 
 		if (!found1 || !found2)
@@ -101,18 +117,14 @@ namespace
 			return;
 		}
 
-		// convert cv matrices to eigen matrices
-		Eigen::MatrixXd corners1_eigen, corners2_eigen;
-
-			//! [estimate-homography]
-		Eigen::MatrixXd H = Eigen::findHomography(corners1_eigen, corners2_eigen);
+		//! [estimate-homography]
+		Eigen::MatrixXd H = findHomography(corners1, corners2);
 		cout << "H:\n" << H << endl;
 		//! [estimate-homography]
 
 		//! [warp-chessboard]
-		//! [warp-chessboard]
-		cout << "corners1:\n" << corners1_eigen << endl;
-		cout << "corners2:\n" << corners2_eigen << endl;
+		cout << "corners1:\n" << corners1 << endl;
+		cout << "corners2:\n" << corners2 << endl;
 	}
 
 	const char* params
@@ -122,6 +134,8 @@ namespace
 		"{ width bw       | 9     | chessboard width }"
 		"{ height bh      | 6     | chessboard height }";
 }
+
+
 
 int main(int argc, char *argv[])
 {
