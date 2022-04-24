@@ -12,5 +12,5 @@ add_executable(ProjectMain ProjectMain.cpp)
 
 target_link_libraries(DisplayImage ${OpenCV_LIBS})
 target_link_libraries(CornerDetection ${OpenCV_LIBS})
-target_link_libraries(ProjectMain Eigen3::Eigen ${OpenCV_LIBS})
+target_link_libraries(ProjectMain Eigen3::Eigen ${OpenCV_LIBRARIES})
 

@@ -1,12 +1,12 @@
-#include <iostream>
+#include <Eigen/Dense>
+#include <Eigen/SVD>
+#include <vector>
 #include <opencv2/core.hpp>
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/highgui.hpp>
-#include <Eigen/Dense>
-#include <Eigen/SVD>
-#include <vector>
+#include <iostream>
 
 using namespace std;
 using namespace cv;
@@ -101,10 +101,6 @@ void eigen_imshow(const Eigen::MatrixXd& eigen_new_img) {
 	cv::imshow("new_img", cv_new_img);
 	cv::waitKey(-1);
 }
-
-
-
-
 
 void perspectiveCorrection(const string &img1Path, const string &img2Path, const Size &patternSize, RNG &rng)
 {
