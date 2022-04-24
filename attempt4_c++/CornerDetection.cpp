@@ -28,6 +28,8 @@ void perspectiveCorrection(const string &img1Path, const string &img2Path, const
     bool found1 = findChessboardCorners(img1, patternSize, corners1);
     bool found2 = findChessboardCorners(img2, patternSize, corners2);
     //! [find-corners]
+    cout << "corners1:\n" << corners1 << endl;
+    cout << "corners2:\n" << corners2 << endl;
 
     if (!found1 || !found2)
     {
