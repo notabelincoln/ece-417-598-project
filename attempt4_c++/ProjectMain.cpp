@@ -22,15 +22,6 @@ Scalar randomColor( RNG& rng )
 }
 
 
-std::vector<Eigen::Vector3d> collectPoints(const cv::Mat& img) {
-	cv::imshow("img", img);
-	std::vector<Eigen::Vector3d> points_clicked;
-	cv::setMouseCallback("img", onMouse, &points_clicked);
-	std::cout << "Please click on 4 points\n";
-	cv::waitKey(-1);
-	return points_clicked;
-}
-
 bool testHomographyFit(const std::vector<Eigen::Vector3d>& us,
 		const std::vector<Eigen::Vector3d>& ups,
 		const Eigen::Matrix3d& H)
