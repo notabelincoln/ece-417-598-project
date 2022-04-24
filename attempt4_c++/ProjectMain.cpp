@@ -1,8 +1,12 @@
 #include <iostream>
 #include <opencv2/core.hpp>
+#include <opencv2/core/eigen.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/highgui.hpp>
+#include <Eigen/Dense>
+#include <Eigen/SVD>
+#include <vector>
 
 using namespace std;
 using namespace cv;
@@ -16,6 +20,100 @@ Scalar randomColor( RNG& rng )
   int icolor = (unsigned int) rng;
   return Scalar( icolor & 255, (icolor >> 8) & 255, (icolor >> 16) & 255 );
 }
+
+
+std::vector<Eigen::Vector3d> collectPoints(const cv::Mat& img) {
+	cv::imshow("img", img);
+	std::vector<Eigen::Vector3d> points_clicked;
+	cv::setMouseCallback("img", onMouse, &points_clicked);
+	std::cout << "Please click on 4 points\n";
+	cv::waitKey(-1);
+	return points_clicked;
+}
+
+bool testHomographyFit(const std::vector<Eigen::Vector3d>& us,
+		const std::vector<Eigen::Vector3d>& ups,
+		const Eigen::Matrix3d& H)
+{
+	for (int i=0; i < us.size(); ++i) {
+		Eigen::Vector3d ups_got = H * us[i];
+		ups_got /= ups_got(2);
+		if (ups_got.isApprox(ups[i])) {
+			std::cout << "Good fit for " << i << "\n";
+		} else {
+			std::cout << "Bad fit for " << i << "\n";
+			std::cout << "ups_got[" << i << "] = " << ups_got << "\n";
+			std::cout << "ups[" << i << "] = " << ups[i] << "\n";
+			return false;
+		}
+	}
+	return true;
+}
+
+Eigen::Matrix3d findHomography(const std::vector<Eigen::Vector3d>& us,
+		const std::vector<Eigen::Vector3d>& ups)
+{
+	if (us.size() < 4 || ups.size() < 4) {
+		std::cerr << "Need at least four points got " << us.size() << " and " << ups.size() << "\n";
+		throw std::runtime_error("Need atleast four points");
+	}
+	Eigen::MatrixXd A(8, 9); A.setZero();
+	for (int i = 0; i < us.size(); ++i) {
+		// [[0ᵀ      -w'ᵢ uᵢᵀ   yᵢ' uᵢᵀ]]
+		//  [wᵢ'uᵢᵀ        0ᵀ   -xᵢ uᵢᵀ]]
+		A.block(2*i, 3, 1, 3) = (-1 * ups[i](2) * us[i].transpose()); // TODO Replace this with correct formula
+		A.block(2*i, 6, 1, 3) = (ups[i](1) * us[i].transpose()); // TODO Replace this with correct formula 
+		A.block(2*i+1, 0, 1, 3) = (ups[i](2) * us[i].transpose()); // TODO Replace this with correct formula
+		A.block(2*i+1, 6, 1, 3) = (-1 * us[i](0) * us[i].transpose()); // TODO Replace this with correct formula
+	}
+
+	auto svd = A.jacobiSvd(Eigen::ComputeFullV);
+	// y = v₉
+	Eigen::VectorXd nullspace = svd.matrixV().col(8); // TODO Replace this with correct formula
+
+	Eigen::Matrix3d H;
+	H.row(0) = nullspace.block(0, 0, 3, 1).transpose(); // TODO: replace with correct formula
+	H.row(1) = nullspace.block(3, 0, 3, 1).transpose(); // TODO: replace with correct formula
+	H.row(2) = nullspace.block(6, 0, 3, 1).transpose(); // TODO: replace with correct formula
+
+	return H;
+}
+
+Eigen::MatrixXd applyHomography(const Eigen::Matrix3d& H,
+		const Eigen::MatrixXd& img) {
+	Eigen::MatrixXd new_img(img.rows(), img.cols());
+	Eigen::Vector3d u;
+	Eigen::Vector3d up;
+	for (int new_row = 0; new_row < new_img.rows(); ++new_row) {
+		for (int new_col = 0; new_col < new_img.cols(); ++new_col) {
+			u << new_col + 0.5, new_row + 0.5, 1;
+			/**** Apply homography for each pixel ***/
+			// u' = H * u
+			up = H * u; // TODO replace with correct formula
+			up /= up(2);
+			/**** Apply homography for each pixel ***/
+			int row = round(up(1));
+			int col = round(up(0));
+			if (0 <= row && row < img.rows()
+					&& 0 <= col && col < img.cols()) {
+				new_img(new_row, new_col) = img(row, col);
+			}
+		}
+	}
+	return new_img;
+}
+
+void eigen_imshow(const Eigen::MatrixXd& eigen_new_img) {
+	cv::Mat cv_new_img;
+	cv::eigen2cv(eigen_new_img, cv_new_img);
+	cv_new_img.convertTo(cv_new_img, CV_8U);
+	cv::imshow("new_img", cv_new_img);
+	cv::waitKey(-1);
+}
+
+
+
+
 
 void perspectiveCorrection(const string &img1Path, const string &img2Path, const Size &patternSize, RNG &rng)
 {
@@ -40,34 +138,9 @@ void perspectiveCorrection(const string &img1Path, const string &img2Path, const
     //! [estimate-homography]
 
     //! [warp-chessboard]
-    Mat img1_warp;
-    warpPerspective(img1, img1_warp, H, img1.size());
     //! [warp-chessboard]
-
-    Mat img_draw_warp;
-    hconcat(img2, img1_warp, img_draw_warp);
-    imshow("Desired chessboard view / Warped source chessboard view", img_draw_warp);
-
-    //! [compute-transformed-corners]
-    Mat img_draw_matches;
-    hconcat(img1, img2, img_draw_matches);
-    for (size_t i = 0; i < corners1.size(); i++)
-    {
-        Mat pt1 = (Mat_<double>(3,1) << corners1[i].x, corners1[i].y, 1);
-        Mat pt2 = H * pt1;
-        pt2 /= pt2.at<double>(2);
-
-        Point end( (int) (img1.cols + pt2.at<double>(0)), (int) pt2.at<double>(1) );
-        line(img_draw_matches, corners1[i], end, randomColor(rng), 2);
-    }
-
-    imshow(img1Path, img1);
-    imshow(img2Path, img2);
-
-    
-    imshow("Draw matches", img_draw_matches);
-    waitKey();
-    //! [compute-transformed-corners]
+    cout << "corners1:\n" << corners1 << endl;
+    cout << "corners2:\n" << corners2 << endl;
 }
 
 const char* params
