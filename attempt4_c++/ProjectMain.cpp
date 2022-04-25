@@ -174,6 +174,13 @@ namespace
 		gamma = -1 * b(1) * alpha*alpha * beta / lambda;
 		u0 = gamma * v0 / beta - b(3) * alpha*alpha / lambda;
 
+		cout << "v0: " << v0 << endl;
+		cout << "lambda: " << lambda << endl;
+		cout << "alpha: " << alpha << endl;
+		cout << "beta: " << beta << endl;
+		cout << "gamma: " << gamma << endl;
+		cout << "u0: " << u0 << endl;
+
 		Eigen::Matrix3d K;
 		K << alpha, gamma, u0,
 		  0, beta, v0,
@@ -182,6 +189,33 @@ namespace
 		return K;
 	}
 
+	Eigen::Matrix<double, 3, 4> getRtMatrix(Eigen::Matrix3d K, Eigen::Matrix3d H)
+	{
+		Eigen::Vector3d K_inv_h1, K_inv_h2, K_inv_h3;
+		K_inv_h1 = K.inverse() * H.col(0);
+		K_inv_h2 = K.inverse() * H.col(1);
+		K_inv_h3 = K.inverse() * H.col(2);
+
+		double lambda = K_inv_h1.norm();
+
+		Eigen::Vector3d r1, r2, r3;
+
+		r1 = lambda * K_inv_h1;
+		r2 = lambda * K_inv_h2;
+		r3 = r1.cross(r2);
+
+		Eigen::Vector3d t = lambda * K_inv_h3;
+
+		Eigen::Matrix3d Q;
+		Q << r1, r2, r3;
+		auto svd = Q.jacobiSvd(Eigen::ComputeFullV | Eigen::ComputeFullU);
+		Eigen::Matrix3d R = svd.matrixU() * svd.matrixV().transpose();
+
+		Eigen::Matrix<double, 3, 4> Rt;
+		Rt << R, t;
+
+		return Rt;
+	}
 
 	const char* params
 		= "{ help h         |       | print usage }"
@@ -209,7 +243,7 @@ int main(int argc, char *argv[])
 	std::vector<Eigen::Matrix3d> Hs;
 
 	for (int i = 0; i < NUM_IMAGES; i++) {
-		cout << "i" << endl;
+		cout << "Finding H of image" << i << ".jpg" << endl;
 		Hs.push_back(getHomography("reference.jpg",
 					"image" + std::to_string(i) + ".jpg",
 					patternSize, rng));
@@ -220,6 +254,11 @@ int main(int argc, char *argv[])
 	Eigen::Matrix3d K = getKMatrix(b);
 
 	cout << "K:\n" << K << endl;
+
+	for (int i = 0; i < NUM_IMAGES; i++) {
+		cout << "Finding Rt matrix for image" << i << ".jpg" << endl;
+		cout << getRtMatrix(K, Hs[i]) << endl;
+	}
 
 	return 0;
 }
