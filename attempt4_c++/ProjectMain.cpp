@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
 
 	Eigen::Matrix<double, 6, 1> b = getbVector(Hs);
 	
-	cout << "b:\n" << b << endl << endl;
+	cout << "b ([B11, B12, B22, B13, B23, B33]):\n" << b << endl << endl;
 	
 	Eigen::Matrix3d K = getKMatrix(b);
 
