@@ -7,6 +7,10 @@
 #include <opencv2/calib3d.hpp>
 #include <opencv2/highgui.hpp>
 #include <iostream>
+#include <cmath>
+#include <string>
+
+#define NUM_IMAGES 2
 
 using namespace std;
 using namespace cv;
@@ -31,21 +35,40 @@ namespace
 		}
 		Eigen::MatrixXd A(8, 9); A.setZero();
 
-		Eigen::Matrix3d u_eigen, up_eigen;
+		Eigen::Vector3d u_eigen, up_eigen;
 
 		u_eigen.setOnes();
 		up_eigen.setOnes();
 
+		cout << A.size() << endl;
+
 		for (int i = 0; i < us.size(); ++i) {
+			cout << "findHomography: " << i << endl;
 			u_eigen(0) = us[i].x;
 			u_eigen(1) = us[i].y;
 
 			up_eigen(0) = ups[i].x;
 			up_eigen(1) = ups[i].y;
 
+			cout << "u_eigen(0): " << u_eigen(0);
+			cout << "u_eigen(1): " << u_eigen(1);
+			cout << "u_eigen(2): " << u_eigen(2);
+			
+			cout << "up_eigen(0): " << up_eigen(0);
+			cout << "up_eigen(1): " << up_eigen(1);
+			cout << "up_eigen(2): " << up_eigen(2);
+
+
+
+		cout << "u_eigen(0): " << u_eigen(0);
+			cout << "u_eigen(1): ";
+
 			// [[0ᵀ      -w'ᵢ uᵢᵀ   yᵢ' uᵢᵀ]]
 			//  [wᵢ'uᵢᵀ        0ᵀ   -xᵢ uᵢᵀ]]
 			A.block(2*i, 3, 1, 3) = (-1 * up_eigen(2) * u_eigen.transpose());
+
+			cout << A.block(2*i, 3, 1, 3) << endl;
+
 			A.block(2*i, 6, 1, 3) = (up_eigen(1) * u_eigen.transpose()); 
 			A.block(2*i+1, 0, 1, 3) = (up_eigen(2) * u_eigen.transpose());
 			A.block(2*i+1, 6, 1, 3) = (-1 * u_eigen(0) * u_eigen.transpose());
@@ -63,44 +86,9 @@ namespace
 		return H;
 	}
 
-	/*
-	// Apply homography to image
-	Eigen::MatrixXd applyHomography(const Eigen::Matrix3d& H,
-			const Eigen::MatrixXd& img) {
-		Eigen::MatrixXd new_img(img.rows(), img.cols());
-		Eigen::Vector3d u;
-		Eigen::Vector3d up;
-		for (int new_row = 0; new_row < new_img.rows(); ++new_row) {
-			for (int new_col = 0; new_col < new_img.cols(); ++new_col) {
-				u << new_col + 0.5, new_row + 0.5, 1;
-				// Apply homography for each pixel
-				// u' = H * u
-				up = H * u; // TODO replace with correct formula
-				up /= up(2);
-				//Apply homography for each pixel
-				int row = round(up(1));
-				int col = round(up(0));
-				if (0 <= row && row < img.rows()
-						&& 0 <= col && col < img.cols()) {
-					new_img(new_row, new_col) = img(row, col);
-				}
-			}
-		}
-		return new_img;
-	}
-	*/
-
-	/*
-	void eigen_imshow(const Eigen::MatrixXd& eigen_new_img) {
-		cv::Mat cv_new_img;
-		cv::eigen2cv(eigen_new_img, cv_new_img);
-		cv_new_img.convertTo(cv_new_img, CV_8U);
-		cv::imshow("new_img", cv_new_img);
-		cv::waitKey(-1);
-	}
-	*/
-
-	void perspectiveCorrection(const string &img1Path, const string &img2Path, const Size &patternSize, RNG &rng)
+	// Compute homography between two images
+	Eigen::Matrix3d getHomography(const string &img1Path, const string &img2Path,
+			const Size &patternSize, RNG &rng)
 	{
 		cv::Mat img1 = imread( samples::findFile(img1Path) );
 		cv::Mat img2 = imread( samples::findFile(img2Path) );
@@ -114,18 +102,98 @@ namespace
 		if (!found1 || !found2)
 		{
 			cout << "Error, cannot find the chessboard corners in both images." << endl;
-			return;
+			return Eigen::Matrix3d::Zero();
 		}
 
 		//! [estimate-homography]
-		Eigen::MatrixXd H = findHomography(corners1, corners2);
+		Eigen::Matrix3d H = findHomography(corners1, corners2);
 		cout << "H:\n" << H << endl;
 		//! [estimate-homography]
 
 		//! [warp-chessboard]
 		cout << "corners1:\n" << corners1 << endl;
 		cout << "corners2:\n" << corners2 << endl;
+
+		return H;
 	}
+
+	Eigen::Matrix<double, 6, 1> getvVector(Eigen::Matrix3d& H,
+			unsigned int i, unsigned int j)
+	{
+		if ((H.isZero()) || (i >= H.rows()) || (j >= H.cols())) {
+			cout << "Error: out of bounds" << endl;
+			return Eigen::Matrix<double, 6, 1>::Zero();
+		}
+
+		Eigen::Matrix<double, 6, 1> v;
+		v(0) = H(1, i) * H(1, j);
+		v(1) = H(1, i) * H(2, j) + H(2, i) * H(1, j);
+		v(2) = H(2, i) * H(2, j);
+		v(3) = H(3, i) * H(1, j) + H(1, i) * H(3, j);
+		v(4) = H(3, i) * H(2, j) + H(2, i) * H(3, j);
+		v(5) = H(i, 3) * H(j, 3);
+
+		return v;
+	}
+
+	// Obtain b vector containg B components
+	Eigen::Matrix<double, 6, 1> getbVector(std::vector<Eigen::Matrix3d>& Hs)
+	{
+		if (Hs.size() < 2)
+			return Eigen::Matrix<double, 6, 1>::Zero();
+
+		Eigen::MatrixXd V;
+		if (Hs.size() == 2) {
+			V.resize(5, 6);
+			V.row(4) << 0, 1, 0, 0, 0, 0;
+		} else {
+			V.resize(2 * Hs.size(), 6);
+		}
+
+		for (int i = 0; i < Hs.size(); i++) {
+			V.row(2*i) = getvVector(Hs[i], 0, 1).transpose();
+			V.row(2 * i + 1) = (getvVector(Hs[i], 0, 0) -
+					getvVector(Hs[i], 0, 0)).transpose();
+		}
+
+		auto svd = V.jacobiSvd(Eigen::ComputeFullV);
+		Eigen::Matrix<double, 6, 1> b = svd.matrixV().rightCols(1);
+
+		return b;
+	}
+
+	// Get camera calibration matrix 
+	Eigen::Matrix3d getKMatrix(Eigen::VectorXd b)
+	{
+		double v0,
+		       lambda,
+		       alpha,
+		       beta,
+		       gamma,
+		       u0;
+		/* b = [B11,
+		 * 	B12,
+		 * 	B22,
+		 * 	B13,
+		 * 	B23,
+		 * 	B33]
+		 * */
+
+		v0 = (b(1) * b(3) - b(0) * b(4)) / (b(0) * b(2) * b(1)*b(1));
+		lambda = b(5) - (b(3)*b(3) * v0 * (b(1) * b(3) - b(0) * b(4))) / b(0);
+		alpha = sqrt(lambda / b(0));
+		beta = sqrt(lambda * b(0) / (b(0) * b(2) - b(1) * b(1)));
+		gamma = -1 * b(1) * alpha*alpha * beta / lambda;
+		u0 = gamma * v0 / beta - b(3) * alpha*alpha / lambda;
+
+		Eigen::Matrix3d K;
+		K << alpha, gamma, u0,
+		  0, beta, v0,
+		  0, 0, 1;
+
+		return K;
+	}
+
 
 	const char* params
 		= "{ help h         |       | print usage }"
@@ -134,8 +202,6 @@ namespace
 		"{ width bw       | 9     | chessboard width }"
 		"{ height bh      | 6     | chessboard height }";
 }
-
-
 
 int main(int argc, char *argv[])
 {
@@ -151,9 +217,20 @@ int main(int argc, char *argv[])
 	}
 
 	Size patternSize(6, 8);
-	perspectiveCorrection("image0.jpg",
-			"image1.jpg",
-			patternSize, rng);
+
+	std::vector<Eigen::Matrix3d> Hs;
+
+	for (int i = 0; i < NUM_IMAGES; i++) {
+		Hs.push_back(getHomography("reference.jpg",
+					"image" + std::to_string(i) + ".jpg",
+					patternSize, rng));
+	}
+
+	Eigen::Matrix<double, 6, 1> b = getbVector(Hs);
+	Eigen::Matrix3d K = getKMatrix(b);
+
+	cout << "K:\n" << K << endl;
 
 	return 0;
 }
+
