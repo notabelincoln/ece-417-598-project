@@ -73,12 +73,9 @@ namespace
 	}
 
 	// Compute homography between two images
-	Eigen::Matrix3d getHomography(const string &img1Path, const string &img2Path,
-			const Size &patternSize, RNG &rng)
+	Eigen::Matrix3d getHomography(const cv::Mat img1, const cv::Mat img2,
+			const Size &patternSize)
 	{
-		cv::Mat img1 = imread( samples::findFile(img1Path) );
-		cv::Mat img2 = imread( samples::findFile(img2Path) );
-
 		//! [find-corners]
 		std::vector<Point2f> corners1, corners2;
 		bool found1 = findChessboardCorners(img1, patternSize, corners1);
@@ -238,15 +235,17 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
+	cv::Mat img_ref = imread(samples::findFile("reference.jpg"));
+
 	Size patternSize(6, 8);
 
 	std::vector<Eigen::Matrix3d> Hs;
 
 	for (int i = 0; i < NUM_IMAGES; i++) {
+		std::string img_path = "image" + std::to_string(i) + ".jpg";
+		cv::Mat img = imread(samples::findFile(img_path));
 		cout << "Finding H of image" << i << ".jpg" << endl;
-		Hs.push_back(getHomography("reference.jpg",
-					"image" + std::to_string(i) + ".jpg",
-					patternSize, rng));
+		Hs.push_back(getHomography(img_ref, img, patternSize));
 	}
 
 	cout << "Getting b vector: " << endl;
