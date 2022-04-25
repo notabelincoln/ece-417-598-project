@@ -33,7 +33,7 @@ namespace
 			std::cerr << "Need at least four points got " << us.size() << " and " << ups.size() << "\n";
 			throw std::runtime_error("Need atleast four points");
 		}
-		Eigen::MatrixXd A(8, 9); A.setZero();
+		Eigen::MatrixXd A(2*us.size(), 9); A.setZero();
 
 		Eigen::Vector3d u_eigen, up_eigen;
 
@@ -43,25 +43,11 @@ namespace
 		cout << A.size() << endl;
 
 		for (int i = 0; i < us.size(); ++i) {
-			cout << "findHomography: " << i << endl;
 			u_eigen(0) = us[i].x;
 			u_eigen(1) = us[i].y;
 
 			up_eigen(0) = ups[i].x;
 			up_eigen(1) = ups[i].y;
-
-			cout << "u_eigen(0): " << u_eigen(0);
-			cout << "u_eigen(1): " << u_eigen(1);
-			cout << "u_eigen(2): " << u_eigen(2);
-			
-			cout << "up_eigen(0): " << up_eigen(0);
-			cout << "up_eigen(1): " << up_eigen(1);
-			cout << "up_eigen(2): " << up_eigen(2);
-
-
-
-		cout << "u_eigen(0): " << u_eigen(0);
-			cout << "u_eigen(1): ";
 
 			// [[0ᵀ      -w'ᵢ uᵢᵀ   yᵢ' uᵢᵀ]]
 			//  [wᵢ'uᵢᵀ        0ᵀ   -xᵢ uᵢᵀ]]
@@ -110,10 +96,6 @@ namespace
 		cout << "H:\n" << H << endl;
 		//! [estimate-homography]
 
-		//! [warp-chessboard]
-		cout << "corners1:\n" << corners1 << endl;
-		cout << "corners2:\n" << corners2 << endl;
-
 		return H;
 	}
 
@@ -126,12 +108,12 @@ namespace
 		}
 
 		Eigen::Matrix<double, 6, 1> v;
-		v(0) = H(1, i) * H(1, j);
-		v(1) = H(1, i) * H(2, j) + H(2, i) * H(1, j);
-		v(2) = H(2, i) * H(2, j);
-		v(3) = H(3, i) * H(1, j) + H(1, i) * H(3, j);
-		v(4) = H(3, i) * H(2, j) + H(2, i) * H(3, j);
-		v(5) = H(i, 3) * H(j, 3);
+		v(0) = H(0, i) * H(0, j);
+		v(1) = H(0, i) * H(1, j) + H(1, i) * H(0, j);
+		v(2) = H(1, i) * H(1, j);
+		v(3) = H(2, i) * H(0, j) + H(0, i) * H(2, j);
+		v(4) = H(2, i) * H(1, j) + H(1, i) * H(2, j);
+		v(5) = H(2, i) * H(2, j);
 
 		return v;
 	}
@@ -143,17 +125,21 @@ namespace
 			return Eigen::Matrix<double, 6, 1>::Zero();
 
 		Eigen::MatrixXd V;
+
 		if (Hs.size() == 2) {
 			V.resize(5, 6);
 			V.row(4) << 0, 1, 0, 0, 0, 0;
 		} else {
 			V.resize(2 * Hs.size(), 6);
 		}
-
+		
+		Eigen::Matrix<double, 6, 1> v12, v11_22;
 		for (int i = 0; i < Hs.size(); i++) {
-			V.row(2*i) = getvVector(Hs[i], 0, 1).transpose();
-			V.row(2 * i + 1) = (getvVector(Hs[i], 0, 0) -
-					getvVector(Hs[i], 0, 0)).transpose();
+			v12 = getvVector(Hs[i], 0, 1);
+			v11_22 = getvVector(Hs[i], 0, 0) - getvVector(Hs[i], 1, 1);
+
+			V.row(2*i) = v12.transpose();
+			V.row(2 * i + 1) = v11_22.transpose();
 		}
 
 		auto svd = V.jacobiSvd(Eigen::ComputeFullV);
@@ -179,10 +165,12 @@ namespace
 		 * 	B33]
 		 * */
 
-		v0 = (b(1) * b(3) - b(0) * b(4)) / (b(0) * b(2) * b(1)*b(1));
-		lambda = b(5) - (b(3)*b(3) * v0 * (b(1) * b(3) - b(0) * b(4))) / b(0);
+		cout << "b:\n" << b << endl;
+
+		v0 = (b(1) * b(3) - b(0) * b(4)) / (b(0) * b(2) - b(1)*b(1));
+		lambda = b(5) - (b(3)*b(3) + v0 * (b(1) * b(3) - b(0) * b(4))) / b(0);
 		alpha = sqrt(lambda / b(0));
-		beta = sqrt(lambda * b(0) / (b(0) * b(2) - b(1) * b(1)));
+		beta = sqrt(lambda * b(0) / (b(0) * b(2) - b(1)*b(1)));
 		gamma = -1 * b(1) * alpha*alpha * beta / lambda;
 		u0 = gamma * v0 / beta - b(3) * alpha*alpha / lambda;
 
@@ -221,11 +209,13 @@ int main(int argc, char *argv[])
 	std::vector<Eigen::Matrix3d> Hs;
 
 	for (int i = 0; i < NUM_IMAGES; i++) {
+		cout << "i" << endl;
 		Hs.push_back(getHomography("reference.jpg",
 					"image" + std::to_string(i) + ".jpg",
 					patternSize, rng));
 	}
 
+	cout << "Getting b vector: " << endl;
 	Eigen::Matrix<double, 6, 1> b = getbVector(Hs);
 	Eigen::Matrix3d K = getKMatrix(b);
 
