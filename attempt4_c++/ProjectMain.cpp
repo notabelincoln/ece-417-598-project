@@ -40,8 +40,6 @@ namespace
 		u_eigen.setOnes();
 		up_eigen.setOnes();
 
-		cout << A.size() << endl;
-
 		for (int i = 0; i < us.size(); ++i) {
 			u_eigen(0) = us[i].x;
 			u_eigen(1) = us[i].y;
@@ -52,8 +50,6 @@ namespace
 			// [[0ᵀ      -w'ᵢ uᵢᵀ   yᵢ' uᵢᵀ]]
 			//  [wᵢ'uᵢᵀ        0ᵀ   -xᵢ uᵢᵀ]]
 			A.block(2*i, 3, 1, 3) = (-1 * up_eigen(2) * u_eigen.transpose());
-
-			cout << A.block(2*i, 3, 1, 3) << endl;
 
 			A.block(2*i, 6, 1, 3) = (up_eigen(1) * u_eigen.transpose()); 
 			A.block(2*i+1, 0, 1, 3) = (up_eigen(2) * u_eigen.transpose());
@@ -90,7 +86,6 @@ namespace
 
 		//! [estimate-homography]
 		Eigen::Matrix3d H = findHomography(corners1, corners2);
-		cout << "H:\n" << H << endl;
 		//! [estimate-homography]
 
 		return H;
@@ -162,8 +157,6 @@ namespace
 		 * 	B33]
 		 * */
 
-		cout << "b:\n" << b << endl;
-
 		v0 = (b(1) * b(3) - b(0) * b(4)) / (b(0) * b(2) - b(1)*b(1));
 		lambda = b(5) - (b(3)*b(3) + v0 * (b(1) * b(3) - b(0) * b(4))) / b(0);
 		alpha = sqrt(lambda / b(0));
@@ -176,7 +169,7 @@ namespace
 		cout << "alpha: " << alpha << endl;
 		cout << "beta: " << beta << endl;
 		cout << "gamma: " << gamma << endl;
-		cout << "u0: " << u0 << endl;
+		cout << "u0: " << u0 << endl << endl;
 
 		Eigen::Matrix3d K;
 		K << alpha, gamma, u0,
@@ -244,19 +237,27 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < NUM_IMAGES; i++) {
 		std::string img_path = "image" + std::to_string(i) + ".jpg";
 		cv::Mat img = imread(samples::findFile(img_path));
-		cout << "Finding H of image" << i << ".jpg" << endl;
-		Hs.push_back(getHomography(img_ref, img, patternSize));
+		Eigen::Matrix3d H = getHomography(img_ref, img, patternSize);
+		
+		cout << img_path << endl << "--------" << endl;		
+	
+		Hs.push_back(H);
+		cout << "H:\n" << H << endl << endl;
 	}
 
-	cout << "Getting b vector: " << endl;
 	Eigen::Matrix<double, 6, 1> b = getbVector(Hs);
+	
+	cout << "b:\n" << b << endl << endl;
+	
 	Eigen::Matrix3d K = getKMatrix(b);
 
-	cout << "K:\n" << K << endl;
+	cout << "K:\n" << K << endl << endl;
 
 	for (int i = 0; i < NUM_IMAGES; i++) {
-		cout << "Finding Rt matrix for image" << i << ".jpg" << endl;
-		cout << getRtMatrix(K, Hs[i]) << endl;
+		Eigen::Matrix<double, 3, 4> Rt = getRtMatrix(K, Hs[i]);
+		cout << "image" << std::to_string(i) << ".jpg" << endl;
+		cout <<"--------" << endl;
+		cout << "Rt:\n" << Rt << endl << endl;
 	}
 
 	return 0;
