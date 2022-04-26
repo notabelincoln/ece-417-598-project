@@ -10,7 +10,7 @@
 #include <cmath>
 #include <string>
 
-#define NUM_IMAGES 2
+#define NUM_IMAGES 5
 
 using namespace std;
 using namespace cv;
