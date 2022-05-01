@@ -58,7 +58,7 @@ namespace
 
 		auto svd = A.jacobiSvd(Eigen::ComputeFullV);
 		// y = v₉
-		Eigen::VectorXd nullspace = svd.matrixV().col(8);
+		Eigen::VectorXd nullspace = svd.matrixV().rightCols(1);
 
 		Eigen::Matrix3d H;
 		H.row(0) = nullspace.block(0, 0, 3, 1).transpose();
