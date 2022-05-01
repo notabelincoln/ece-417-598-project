@@ -86,7 +86,7 @@ namespace
 
 		//! [estimate-homography]
 		Eigen::Matrix3d H = findHomography(corners1, corners2);
-		cout << "H (OpenCV):\n" << cv::findHomography(corners1, corners2) << endl;
+		//cout << "H (OpenCV):\n" << cv::findHomography(corners1, corners2) << endl;
 		//! [estimate-homography]
 
 		return H;
